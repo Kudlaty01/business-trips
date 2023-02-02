@@ -5,56 +5,67 @@ namespace App\Domain\BusinessTrip\Service;
 use App\Domain\BusinessTrip\Entity\BusinessTrip;
 use DateInterval;
 use DatePeriod;
+use DateTime;
 use DateTimeInterface;
 
-class BusinessTripPeriodGenerator
+use Exception;
+
+readonly class BusinessTripPeriodGenerator
 {
+    private const DATE_FORMAT_STRING = 'Y-m-d';
+    private const TIME_FORMAT_STRING = 'H:i:s';
+
+    public function __construct(private int $minimumHoursForAllowance = 8)
+    {
+    }
+
     /**
-     * @param BusinessTrip $businessTrip
-     *
-     * @return DatePeriod
+     * @throws Exception
      */
     public function getBusinessTripPeriod(BusinessTrip $businessTrip
     ): DatePeriod {
         return new DatePeriod(
             $businessTrip->startDate,
-            new DateInterval('P1D'),
-            $businessTrip->endDate,
-            $this->resolveDatePeriodOptions(
-                $businessTrip->startDate,
-                $businessTrip->endDate
+            self::getOneDayInterval(),
+            $this->getAdjustedEndDateForAllowanceRules($businessTrip),
+            $this->getStartDateExclusion(
+                $businessTrip->startDate
             )
         );
     }
 
-    private function resolveDatePeriodOptions(
-        DateTimeInterface $startDate,
-        DateTimeInterface $endDate
-    ): int {
-        return $this->getDatePeriodOptionForPastHour(
-                $startDate,
-                16,
-                DatePeriod::EXCLUDE_START_DATE
+    private function getStartDateExclusion(DateTimeInterface $startDate): int
+    {
+        return (int) self::isTimePastHour(
+            $startDate,
+            24 - $this->minimumHoursForAllowance,
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getAdjustedEndDateForAllowanceRules(
+        BusinessTrip $businessTrip
+    ): DateTimeInterface {
+        return new DateTime($businessTrip->endDate->format(self::DATE_FORMAT_STRING) . (
+            !self::isTimePastHour(
+                $businessTrip->endDate,
+                $this->minimumHoursForAllowance
             )
-            | $this->getDatePeriodOptionForPastHour(
-                $endDate,
-                8,
-                DatePeriod::INCLUDE_END_DATE
-            );
+                ? ' ' . DateTime::createFromInterface($businessTrip->startDate)
+                    ->modify('+1 minutes')->format(self::TIME_FORMAT_STRING)
+                : ''
+            ));
     }
 
-    private function getDatePeriodOptionForPastHour(
-        DateTimeInterface $date,
-        int $hour,
-        int $dateTimePeriodOption
-    ): int {
-        return $this->isTimePastHour($date, $hour)
-            ? $dateTimePeriodOption
-            : 0;
-    }
-
-    private function isTimePastHour(DateTimeInterface $date, int $hour): bool
+    private static function isTimePastHour(DateTimeInterface $date, int $hour): bool
     {
         return ((int) $date->format('H')) >= $hour;
+    }
+
+    private static function getOneDayInterval(): DateInterval
+    {
+        return new DateInterval('P1D');
     }
 }
