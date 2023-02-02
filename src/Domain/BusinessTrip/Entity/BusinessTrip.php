@@ -50,7 +50,7 @@ class BusinessTrip
     #[Groups(['read', 'write'])]
     public ?DateTimeInterface $endDate = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(precision: 2, nullable: true)]
     #[Groups(['read'])]
     public ?float $allowance = null;
 
