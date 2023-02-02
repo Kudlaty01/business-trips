@@ -43,12 +43,12 @@ class BusinessTrip
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotBlank]
     #[Groups(['read', 'write'])]
-    public ?DateTimeInterface $startDate = null;
+    public DateTimeInterface $startDate;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotBlank]
     #[Groups(['read', 'write'])]
-    public ?DateTimeInterface $endDate = null;
+    public DateTimeInterface $endDate;
 
     #[ORM\Column(precision: 2, nullable: true)]
     #[Groups(['read'])]
