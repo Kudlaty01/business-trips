@@ -20,7 +20,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(operations: [
     new GetCollection(),
     new Get(),
-    new Post(),
+    new Post(
+        controller: BusinessTripController::class,
+    ),
     new Delete(),
 ], normalizationContext: ['groups' => ['read']],
     denormalizationContext: ['groups' => ['write']],
