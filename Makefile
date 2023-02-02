@@ -39,9 +39,19 @@ ps:
 	$(call colorecho, "\nDocker containers process status $(OS)")
 	@docker-compose ps
 
-##
-##SSH (Docker)
-##
+PHONY += migration
+migration:	## Create Migration files
+migration:
+	$(call colorecho, "\nCreating Database Migration:\n")
+	@docker exec bs-php bin/console doctrine:cache:clear-metadata
+	@docker exec bs-php bin/console make:migration
+
+PHONY += migrate
+migrate:		## Migrate database
+migrate:
+	$(call colorecho, "\nMigrating Project Datase\n")
+	@docker exec bs-php bin/console doctrine:migrations:migrate --no-interaction
+
 
 PHONY += ssh
 attach:		## SSH to API container

@@ -9,6 +9,12 @@ RUN set -eux; \
 	composer clear-cache
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
+RUN docker-php-ext-install -j$(nproc) \
+    mysqli \
+    pdo_mysql \
+    ;
+
+
 WORKDIR /application
 COPY composer.json composer.lock ./
 RUN set -eux; \
