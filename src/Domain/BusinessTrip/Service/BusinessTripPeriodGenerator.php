@@ -26,7 +26,7 @@ readonly class BusinessTripPeriodGenerator
     ): DatePeriod {
         return new DatePeriod(
             $businessTrip->startDate,
-            new DateInterval('P1D'),
+            self::getOneDayInterval(),
             $this->getAdjustedEndDateForAllowanceRules($businessTrip),
             $this->getStartDateExclusion(
                 $businessTrip->startDate
@@ -62,5 +62,10 @@ readonly class BusinessTripPeriodGenerator
     private static function isTimePastHour(DateTimeInterface $date, int $hour): bool
     {
         return ((int) $date->format('H')) >= $hour;
+    }
+
+    private static function getOneDayInterval(): DateInterval
+    {
+        return new DateInterval('P1D');
     }
 }
