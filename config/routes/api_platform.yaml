@@ -1,0 +1,4 @@
+api_platform:
+    resource: ./Domain/BusinessTrip
+    type: api_platform
+    prefix: /api
