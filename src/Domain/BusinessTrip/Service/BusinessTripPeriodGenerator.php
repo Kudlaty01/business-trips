@@ -15,6 +15,10 @@ readonly class BusinessTripPeriodGenerator
     private const DATE_FORMAT_STRING = 'Y-m-d';
     private const TIME_FORMAT_STRING = 'H:i:s';
 
+    public function __construct(private int $minimumHoursForAllowance = 8)
+    {
+    }
+
     /**
      * @throws Exception
      */
@@ -34,7 +38,7 @@ readonly class BusinessTripPeriodGenerator
     {
         return (int) self::isTimePastHour(
             $startDate,
-            16,
+            24 - $this->minimumHoursForAllowance,
         );
     }
 
@@ -45,7 +49,10 @@ readonly class BusinessTripPeriodGenerator
         BusinessTrip $businessTrip
     ): DateTimeInterface {
         return new DateTime($businessTrip->endDate->format(self::DATE_FORMAT_STRING) . (
-            !self::isTimePastHour($businessTrip->endDate, 8)
+            !self::isTimePastHour(
+                $businessTrip->endDate,
+                $this->minimumHoursForAllowance
+            )
                 ? ' ' . DateTime::createFromInterface($businessTrip->startDate)
                     ->modify('+1 minutes')->format(self::TIME_FORMAT_STRING)
                 : ''
